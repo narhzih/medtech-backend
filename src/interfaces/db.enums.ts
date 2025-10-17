@@ -16,3 +16,22 @@ export enum AdminPermission {
   PAYOUT = 'PAYOUT',
   VIEW_APPOINTEMENTS = 'VIEW_APPOINTEMENTS',
 }
+
+export enum Gender {
+  MALE = 'M',
+  FEMALE = 'F',
+}
+
+export enum Genotype {
+  AA = 'AA',
+  AS = 'AS',
+  SS = 'SS',
+  AC = 'AC',
+  SC = 'SC',
+}
+
+export enum BloodGroup {
+  OPositive = 'O+',
+  BNegative = 'B-',
+  BPositive = 'B+',
+}
