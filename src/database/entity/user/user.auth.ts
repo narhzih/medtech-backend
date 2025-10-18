@@ -25,10 +25,11 @@ export class UserAuth {
   @Column({
     nullable: false,
     type: 'enum',
+    enum: AuthMethod,
     array: true,
     default: [AuthMethod.EMAIL_AND_PASSWORD],
   })
-  nmethods: AuthMethod[];
+  methods: AuthMethod[];
 
   @Index({ unique: true, where: '"phoneNumber" IS NOT NULL' })
   @Column({ nullable: true })

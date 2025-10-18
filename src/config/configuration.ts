@@ -1,20 +1,21 @@
 import 'reflect-metadata';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
+import { DataSourceOptions } from 'typeorm';
+require('dotenv').config();
 
 const database: TypeOrmModuleOptions = {
   type: 'postgres',
-  entities: ['src/database/entity/*/*{.ts,.js}'],
-  migrations: ['src/database/migration/*{.ts,.js}'],
+  entities: ['dist/database/entity/*/*{.ts,.js}'],
+  migrations: ['dist/database/migration/*{.ts,.js}'],
   connectTimeoutMS: 60000, // 60 seconds,
   logging: true,
-  extra: {
-    ssl:
-      process.env.DB_SUPPORTS_SSL === 'true'
-        ? { rejectUnauthorized: false }
-        : undefined,
-    sslmode: 'prefer',
-  },
+  autoLoadEntities: true,
+  host: <string>process.env.DB_HOST,
+  port: parseInt((<string>process.env.DB_PORT) as string, 10),
+  username: <string>process.env.DB_USER,
+  password: <string>process.env.DB_PASSWORD,
+  database: <string>process.env.DB_NAME,
+  synchronize: <string>process.env.MEDTECH_ENV === 'development',
 };
 
 export default () => ({
