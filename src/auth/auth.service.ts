@@ -19,8 +19,9 @@ import { RedisCacheService } from 'src/cache/redis.cache.service';
 export class AuthService {
   private readonly encryptionKey: string;
   private readonly tokenGenerationException: HttpException;
+  private readonly logger = new Logger(AuthService.name)
   constructor(
-    private readonly logger: Logger,
+    //private readonly logger: Logger,
     private readonly redisCacheService: RedisCacheService,
     @InjectRepository(AuthToken)
     private readonly userAuthTokenRepository: Repository<AuthToken>,
@@ -34,7 +35,7 @@ export class AuthService {
   async logoutUser(userId: string) {
     throw new NotImplementedException('logoutUser Method not implemented yet');
   }
-
+j
   async generateUserToken(userId: string, userRole: RoleType): Promise<string> {
     const expiresAt = new Date(
       Date.now() + USER_TOKEN_EXPIRY_IN_SECONDS * 1000,

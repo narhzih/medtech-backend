@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Logger, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthToken } from 'src/database/entity/user/auth.token';
@@ -10,7 +10,7 @@ import { RedisCacheService } from 'src/cache/redis.cache.service';
 @Module({
   imports: [
     TypeOrmModule.forFeature([AuthToken, UserAuth, User]),
-    ConfigModule,
+    ConfigModule
   ],
   controllers: [],
   providers: [AuthService, AuthorizationMiddleware, RedisCacheService],

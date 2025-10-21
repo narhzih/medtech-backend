@@ -15,7 +15,8 @@ const database: TypeOrmModuleOptions = {
   username: <string>process.env.DB_USER,
   password: <string>process.env.DB_PASSWORD,
   database: <string>process.env.DB_NAME,
-  synchronize: <string>process.env.MEDTECH_ENV === 'development',
+  // synchronize: <string>process.env.MEDTECH_ENV === 'development',
+  synchronize: true,
 };
 
 export default () => ({
