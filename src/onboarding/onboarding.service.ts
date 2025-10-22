@@ -7,12 +7,14 @@ import { RegisterDto } from "./dto/register-user.dto";
 import { LoginDto } from "./dto/login-user.dto";
 import { RoleType } from "src/interfaces/db.enums";
 import { AuthService } from "src/auth/auth.service";
+import { OtpService } from "./otp.service";
 
 
 export class OnboardingService{
     constructor(
         //private readonly logger: Logger,
         private readonly authService: AuthService,
+        private readonly otpService: OtpService,
         @InjectRepository(User)
         private readonly userRepository: Repository<User>
     ){}
@@ -36,7 +38,13 @@ export class OnboardingService{
 
         const savedUser = await this.userRepository.save(newUser)
 
-        return savedUser
+        const response = await this.otpService.generateOtp(phoneNumber)
+
+        return{
+            message: 'Signed Up successfully',
+            response,
+            savedUser
+        } 
     }
 
     async login(loginDto: LoginDto){
@@ -50,9 +58,13 @@ export class OnboardingService{
         if(hashedPassword !== user.password){
             throw new BadRequestException('Invalid password')
         }
+        if(!user.phoneVerified){
+            await this.otpService.generateOtp(user.phoneNumber)
+            throw new BadRequestException('Otp has been sent to your number, verify first')
+        }
         const userId = user.id;
         const userRole = RoleType.USER;
-        const accessToken = this.authService.generateUserToken(userId,userRole)
+        const accessToken = await this.authService.generateUserToken(userId,userRole)
         return {
             message:'Login successful',
             accessToken,

@@ -4,7 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthToken } from 'src/database/entity/user/auth.token';
 import { User } from 'src/database/entity/user/user';
 import { UserAuth } from 'src/database/entity/user/user.auth';
-import { AuthService } from './auth.service';
+import { AuthService, MockRedisCacheService } from './auth.service';
 import { AuthorizationMiddleware } from './authorization.middleware';
 import { RedisCacheService } from 'src/cache/redis.cache.service';
 @Module({
@@ -13,7 +13,13 @@ import { RedisCacheService } from 'src/cache/redis.cache.service';
     ConfigModule
   ],
   controllers: [],
-  providers: [AuthService, AuthorizationMiddleware, RedisCacheService],
+  providers: [AuthService, AuthorizationMiddleware, 
+    {
+      provide: RedisCacheService,
+      useClass: process.env.REDIS_ENABLED === 'true'?
+      RedisCacheService
+      : MockRedisCacheService
+    }],
   exports: [AuthService, AuthorizationMiddleware],
 })
 export class AuthModule {}
