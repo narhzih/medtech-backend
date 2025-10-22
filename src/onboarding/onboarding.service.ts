@@ -1,0 +1,74 @@
+import { BadRequestException, Logger, NotFoundException } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { User } from "src/database/entity/user/user";
+import { EncryptionService } from "src/helpers/encryption.service";
+import { Repository } from "typeorm";
+import { RegisterDto } from "./dto/register-user.dto";
+import { LoginDto } from "./dto/login-user.dto";
+import { RoleType } from "src/interfaces/db.enums";
+import { AuthService } from "src/auth/auth.service";
+import { OtpService } from "./otp.service";
+
+
+export class OnboardingService{
+    constructor(
+        //private readonly logger: Logger,
+        private readonly authService: AuthService,
+        private readonly otpService: OtpService,
+        @InjectRepository(User)
+        private readonly userRepository: Repository<User>
+    ){}
+
+    async registerUser(registerDto: RegisterDto){
+        const {email, phoneNumber,confirmPassword,firstName,lastName} = registerDto
+        const user = await this.userRepository.findOne({where: {email}})
+        if(user){
+            throw new BadRequestException('user with email exists')
+        }
+        const phone = await this.userRepository.findOne({where: {phoneNumber}})
+        if(phone){
+            throw new BadRequestException('user with phone number exists')
+        }
+        if(registerDto.password !== confirmPassword){
+            throw new BadRequestException('password must match')
+        }
+        const password = await EncryptionService.hash(registerDto.password)
+
+        const newUser = this.userRepository.create({email, phoneNumber,password,firstName,lastName})
+
+        const savedUser = await this.userRepository.save(newUser)
+
+        const response = await this.otpService.generateOtp(phoneNumber)
+
+        return{
+            message: 'Signed Up successfully',
+            response,
+            savedUser
+        } 
+    }
+
+    async login(loginDto: LoginDto){
+        const{email, password} = loginDto;
+
+        const user = await this.userRepository.findOne({where: {email}})
+        if(!user){
+            throw new NotFoundException("User not found, please sign up")
+        }
+        const hashedPassword = await EncryptionService.hash(password)
+        if(hashedPassword !== user.password){
+            throw new BadRequestException('Invalid password')
+        }
+        if(!user.phoneVerified){
+            await this.otpService.generateOtp(user.phoneNumber)
+            throw new BadRequestException('Otp has been sent to your number, verify first')
+        }
+        const userId = user.id;
+        const userRole = RoleType.USER;
+        const accessToken = await this.authService.generateUserToken(userId,userRole)
+        return {
+            message:'Login successful',
+            accessToken,
+            user
+        }
+    }
+} 

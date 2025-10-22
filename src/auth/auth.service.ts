@@ -14,13 +14,25 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { AuthToken } from 'src/database/entity/user/auth.token';
 import { Repository } from 'typeorm';
 import { RedisCacheService } from 'src/cache/redis.cache.service';
+import { cookieConfig} from 'src/config/token.config';
+import { Response } from 'express';
+import th from 'zod/v4/locales/th.js';
 
 @Injectable()
+export class MockRedisCacheService {
+  private readonly logger = new Logger(MockRedisCacheService.name);
+
+  async setEntityToken(...args: any[]) {
+    this.logger.log('Mock setEntityToken called');
+    return;
+  }
+}
 export class AuthService {
   private readonly encryptionKey: string;
   private readonly tokenGenerationException: HttpException;
+  private readonly logger = new Logger(AuthService.name)
   constructor(
-    private readonly logger: Logger,
+    //private readonly logger: Logger,
     private readonly redisCacheService: RedisCacheService,
     @InjectRepository(AuthToken)
     private readonly userAuthTokenRepository: Repository<AuthToken>,
@@ -31,8 +43,8 @@ export class AuthService {
     );
   }
 
-  async logoutUser(userId: string) {
-    throw new NotImplementedException('logoutUser Method not implemented yet');
+  async logoutUser() {
+    return 'User signed out successfully'
   }
 
   async generateUserToken(userId: string, userRole: RoleType): Promise<string> {
@@ -98,5 +110,12 @@ export class AuthService {
       this.logger.log('AuthService: Error occurred while generating jwt token');
       throw this.tokenGenerationException;
     }
+  }
+  setCookie(res: Response, authToken: string){
+      res.cookie(cookieConfig.name, authToken, cookieConfig.info)
+  }
+
+  clearCookie(res: Response){
+    res.clearCookie(cookieConfig.name, cookieConfig.info)
   }
 }

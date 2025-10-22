@@ -20,6 +20,10 @@ export class User {
   @Column({ nullable: false })
   email: string;
 
+  @Index({ unique: false })
+  @Column({ nullable: false })
+  password: string;
+
   @Column({ nullable: true })
   phoneVerified?: boolean;
 
@@ -31,9 +35,6 @@ export class User {
 
   @Column({ nullable: false, length: 50 })
   lastName: string;
-
-  @Column({ nullable: true, length: 50 })
-  username?: string;
 
   @CreateDateColumn({
     nullable: false,
